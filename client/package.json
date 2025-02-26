@@ -35,7 +35,7 @@
     "@types/node": "^22.13.4",
     "@typescript-eslint/parser": "8.25.0",
     "@typescript-eslint/eslint-plugin": "8.25.0",
-    "eslint": "^9.15.0",
+    "eslint": "^9.21.0",
     "typescript": ">=5.2.0 <5.8.0"
   },
   "resolutions": {
