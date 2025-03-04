@@ -31,7 +31,7 @@ updates:
     allow:
       - dependency-type: "direct"   # Only update direct dependencies
     ignore:   # Ignore updates outside of ^17.3.x for Angular packages
-      - dependency-name: "@angular/*"   # Limit updates to versions within ^17.3.x [LTS ends 2025-05-15]
+      - dependency-name: "@angular/**"   # Limit updates to versions within ^17.3.x [LTS ends 2025-05-15]
         versions: [ "17.3.0" ]
 
 
