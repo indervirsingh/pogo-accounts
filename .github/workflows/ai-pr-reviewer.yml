@@ -1,4 +1,4 @@
-name: Code Review
+name: Code Review & Auto Approve
 
 permissions:
   contents: read
@@ -20,7 +20,8 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: coderabbitai/ai-pr-reviewer@latest
+      - name: AI Code Review
+        uses: coderabbitai/ai-pr-reviewer@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -28,3 +29,8 @@ jobs:
           debug: false
           review_simple_changes: false
           review_comment_lgtm: false
+
+      - name: Auto Approve if Review is Successful
+        run: gh pr review ${{ github.event.pull_request.html_url }} --approve
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
