@@ -33,4 +33,4 @@ jobs:
       - name: Auto Approve if Review is Successful
         run: gh pr review ${{ github.event.pull_request.html_url }} --approve
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
