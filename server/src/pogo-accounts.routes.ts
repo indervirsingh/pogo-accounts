@@ -1,6 +1,7 @@
 import * as express from "express"
 import * as mongodb from "mongodb"
 import { collections } from "./database"
+import * as escape from "escape-html"
 
 export const pogoAccountsRouter = express.Router()
 pogoAccountsRouter.use(express.json())
@@ -111,7 +112,7 @@ pogoAccountsRouter.delete("/:id", async (req, res) => {
         if (typeof result !== null) {
             res.status(200).send(`Successfully deleted ${id}`)
         } else {
-            res.status(404).send(`Failed to find account id: ${id}`)
+            res.status(404).send(`Failed to find account id: ${escape(id)}`)
         }
 
     } catch (error) {
