@@ -109,7 +109,7 @@ pogoAccountsRouter.delete("/:id", async (req, res) => {
         // findOneAndDelete() finds the pogoAccount with the given id and deletes it
         const result = await collections.pogoAccounts.findOneAndDelete(query)
 
-        if (typeof result !== null) {
+        if (result !== null) {
             res.status(200).send(`Successfully deleted ${escape(id)}`)
         } else {
             res.status(404).send(`Failed to find account id: ${escape(id)}`)
