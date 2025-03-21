@@ -30,7 +30,7 @@ jobs:
           review_simple_changes: false
           review_comment_lgtm: false
 
-      - name: Auto Approve if Review is Successful
-        run: gh pr review ${{ github.event.pull_request.html_url }} --approve
-        env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+      - name: Auto Approve PR
+        uses: hmarr/auto-approve-action@v3
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
