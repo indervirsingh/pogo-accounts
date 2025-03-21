@@ -14,7 +14,7 @@ pogoAccountsRouter.get("/", async (_req, res) => {
         const pogoAccounts = await collections.pogoAccounts.find({}).toArray()
         res.status(200).send(pogoAccounts)
     } catch (error) {
-        res.status(500).send(error.message)
+        res.status(500).send(escape(error.message))
     }
 })
 
@@ -38,7 +38,7 @@ pogoAccountsRouter.get("/:id", async (req, res) => {
         }
 
     } catch (error) {
-        res.status(500).send(`Failed to find a pogo account with id: ${req?.params?.id}`)
+        res.status(500).send(`Failed to find a pogo account with id: ${escape(req?.params?.id)}`)
     }
 
 })
@@ -63,7 +63,7 @@ pogoAccountsRouter.post("/", async (req, res) => {
         }
 
     } catch (error) {
-        res.status(500).send(error.message)
+        res.status(500).send(escape(error.message))
     }
 })
 
@@ -116,7 +116,7 @@ pogoAccountsRouter.delete("/:id", async (req, res) => {
         }
 
     } catch (error) {
-        res.status(500).send(error.message)
+        res.status(500).send(escape(error.message))
     }
 })
 
