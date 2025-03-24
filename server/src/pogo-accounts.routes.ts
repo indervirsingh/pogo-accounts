@@ -85,11 +85,11 @@ pogoAccountsRouter.put("/:id", async (req, res) => {
         const result = await collections.pogoAccounts.updateOne(query, { $set: updated_pogoAccount })
 
         if (result && result.matchedCount) {
-            res.status(200).send(`Successfully updated ${updated_pogoAccount.username}`)
+            res.status(200).send(`Successfully updated ${escape(updated_pogoAccount.username)}`)
         } else if (!result.matchedCount) {
-            res.status(404).send(`Failed to find account id: ${id}`)
+            res.status(404).send(`Failed to find account id: ${escape(id)}`)
         } else {
-            res.status(304).send(`Failed to update account id: ${id}`)
+            res.status(304).send(`Failed to update account id: ${escape(id)}`)
         }
 
     } catch (error) {
