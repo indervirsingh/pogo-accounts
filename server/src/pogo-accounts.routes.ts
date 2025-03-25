@@ -2,9 +2,17 @@ import * as express from "express"
 import * as mongodb from "mongodb"
 import { collections } from "./database"
 import * as escape from "escape-html"
+import * as rateLimit from "express-rate-limit";
 
 export const pogoAccountsRouter = express.Router()
 pogoAccountsRouter.use(express.json())
+// Set up rate limiter: maximum of 100 requests per 15 minutes
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // max 100 requests per windowMs
+});
+
+pogoAccountsRouter.use(limiter);
 
 // The route is "/" because all the endpoints from this file are registered under 'pogo-accounts' route
 pogoAccountsRouter.get("/", async (_req, res) => {
