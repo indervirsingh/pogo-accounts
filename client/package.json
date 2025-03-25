@@ -26,14 +26,14 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "^19.2.4",
     "@angular-eslint/builder": "19.2.1",
-    "@angular-eslint/eslint-plugin-template": "19.2.1",
+    "@angular-eslint/eslint-plugin-template": "19.3.0",
     "@angular-eslint/eslint-plugin": "19.2.1",
     "@angular-eslint/schematics": "19.2.1",
     "@angular/cli": "~19.2.4",
     "@angular-eslint/template-parser": "19.2.1",
     "@angular/compiler-cli": "^19.2.3",
-    "@types/node": "^22.13.11",
-    "@typescript-eslint/parser": "8.26.1",
+    "@types/node": "^22.13.13",
+    "@typescript-eslint/parser": "8.27.0",
     "@typescript-eslint/eslint-plugin": "8.27.0",
     "eslint": "^9.22.0",
     "typescript": "^5.8.2"
