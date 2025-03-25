@@ -114,7 +114,7 @@ pogoAccountsRouter.put("/:id", async (req, res) => {
         }
 
     } catch (error) {
-        res.status(400).send(error.message)
+        res.status(400).send(escape(error.message))
     }
 })
 
