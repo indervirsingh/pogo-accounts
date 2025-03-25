@@ -1,4 +1,4 @@
-name: Code Review & Auto Approve
+name: CodeRabbitAI Code Review
 
 permissions:
   contents: read
