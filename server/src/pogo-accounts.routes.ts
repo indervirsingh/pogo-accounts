@@ -4,6 +4,19 @@ import { collections } from "./database"
 import * as escape from "escape-html"
 import * as rateLimit from "express-rate-limit";
 
+function sanitizePogoAccount(account) {
+    // Add validation and sanitization logic here
+    // For example, ensure only allowed fields are present
+    const allowedFields = ["username", "email", "level"];
+    const sanitizedAccount = {};
+    for (const field of allowedFields) {
+        if (account[field]) {
+            sanitizedAccount[field] = escape(account[field]);
+        }
+    }
+    return sanitizedAccount;
+}
+
 export const pogoAccountsRouter = express.Router()
 pogoAccountsRouter.use(express.json())
 // Set up rate limiter: maximum of 100 requests per 15 minutes
@@ -83,7 +96,7 @@ pogoAccountsRouter.put("/:id", async (req, res) => {
     try {
 
         // Extract pogoAccount data to update via body
-        const updated_pogoAccount = req?.body
+        const updated_pogoAccount = sanitizePogoAccount(req?.body)
         // Extract id via params
         const id = req?.params?.id
 
