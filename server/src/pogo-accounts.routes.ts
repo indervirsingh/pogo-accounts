@@ -2,9 +2,30 @@ import * as express from "express"
 import * as mongodb from "mongodb"
 import { collections } from "./database"
 import * as escape from "escape-html"
+import * as rateLimit from "express-rate-limit";
+
+function sanitizePogoAccount(account) {
+    // Add validation and sanitization logic here
+    // For example, ensure only allowed fields are present
+    const allowedFields = ["username", "email", "level"];
+    const sanitizedAccount = {};
+    for (const field of allowedFields) {
+        if (account[field]) {
+            sanitizedAccount[field] = escape(account[field]);
+        }
+    }
+    return sanitizedAccount;
+}
 
 export const pogoAccountsRouter = express.Router()
 pogoAccountsRouter.use(express.json())
+// Set up rate limiter: maximum of 100 requests per 15 minutes
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // max 100 requests per windowMs
+});
+
+pogoAccountsRouter.use(limiter);
 
 // The route is "/" because all the endpoints from this file are registered under 'pogo-accounts' route
 pogoAccountsRouter.get("/", async (_req, res) => {
@@ -14,7 +35,7 @@ pogoAccountsRouter.get("/", async (_req, res) => {
         const pogoAccounts = await collections.pogoAccounts.find({}).toArray()
         res.status(200).send(pogoAccounts)
     } catch (error) {
-        res.status(500).send(error.message)
+        res.status(500).send(escape(error.message))
     }
 })
 
@@ -34,11 +55,11 @@ pogoAccountsRouter.get("/:id", async (req, res) => {
         if (pogoAccount) {
             res.status(200).send(pogoAccount)
         } else {
-            res.status(404).send(`Failed to find a pogo account with id: ${id}`)
+            res.status(404).send(`Failed to find a pogo account with id: ${escape(id)}`)
         }
 
     } catch (error) {
-        res.status(500).send(`Failed to find a pogo account with id: ${req?.params?.id}`)
+        res.status(500).send(`Failed to find a pogo account with id: ${escape(req?.params?.id)}`)
     }
 
 })
@@ -63,7 +84,7 @@ pogoAccountsRouter.post("/", async (req, res) => {
         }
 
     } catch (error) {
-        res.status(500).send(error.message)
+        res.status(500).send(escape(error.message))
     }
 })
 
@@ -75,7 +96,7 @@ pogoAccountsRouter.put("/:id", async (req, res) => {
     try {
 
         // Extract pogoAccount data to update via body
-        const updated_pogoAccount = req?.body
+        const updated_pogoAccount = sanitizePogoAccount(req?.body)
         // Extract id via params
         const id = req?.params?.id
 
@@ -85,15 +106,15 @@ pogoAccountsRouter.put("/:id", async (req, res) => {
         const result = await collections.pogoAccounts.updateOne(query, { $set: updated_pogoAccount })
 
         if (result && result.matchedCount) {
-            res.status(200).send(`Successfully updated ${updated_pogoAccount.username}`)
+            res.status(200).send(`Successfully updated ${escape(updated_pogoAccount.username)}`)
         } else if (!result.matchedCount) {
-            res.status(404).send(`Failed to find account id: ${id}`)
+            res.status(404).send(`Failed to find account id: ${escape(id)}`)
         } else {
-            res.status(304).send(`Failed to update account id: ${id}`)
+            res.status(304).send(`Failed to update account id: ${escape(id)}`)
         }
 
     } catch (error) {
-        res.status(400).send(error.message)
+        res.status(400).send(escape(error.message))
     }
 })
 
@@ -109,14 +130,14 @@ pogoAccountsRouter.delete("/:id", async (req, res) => {
         // findOneAndDelete() finds the pogoAccount with the given id and deletes it
         const result = await collections.pogoAccounts.findOneAndDelete(query)
 
-        if (typeof result !== null) {
-            res.status(200).send(`Successfully deleted ${id}`)
+        if (result !== null) {
+            res.status(200).send(`Successfully deleted ${escape(id)}`)
         } else {
             res.status(404).send(`Failed to find account id: ${escape(id)}`)
         }
 
     } catch (error) {
-        res.status(500).send(error.message)
+        res.status(500).send(escape(error.message))
     }
 })
 
