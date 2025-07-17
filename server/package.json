@@ -16,7 +16,7 @@
     "express": "^5.1.0",
     "mongodb": "^6.14.2",
     "escape-html": "^1.0.3",
-    "express-rate-limit": "^7.5.0"
+    "express-rate-limit": "^8.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
