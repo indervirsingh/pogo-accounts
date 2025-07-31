@@ -9,9 +9,6 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 
-const fs = require('fs');
-const path = require('path');
-
 describe('Package.json Schema and NPM Integration Tests', () => {
   let packageConfig;
 
