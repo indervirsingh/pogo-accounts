@@ -54,7 +54,7 @@ describe('Package.json Schema and NPM Integration Tests', () => {
   });
 
   // ... rest of your tests ...
-});
+  // ... rest of your tests ...
 
   describe('NPM Package Schema Compliance', () => {
     test('should comply with package.json schema', () => {
