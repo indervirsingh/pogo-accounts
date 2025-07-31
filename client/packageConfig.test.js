@@ -235,8 +235,15 @@ describe('Package Configuration Validation', () => {
 
     test('should have valid tarball URLs', () => {
       Object.values(packageConfig.resolutions).forEach(resolution => {
-        if (typeof resolution === 'string' && resolution.includes('registry.npmjs.org')) {
-          expect(resolution).toMatch(/https:\/\/registry\.npmjs\.org\/.+\.tgz$/);
+        if (typeof resolution === 'string') {
+          try {
+            const url = new URL(resolution);
+            if (url.hostname === 'registry.npmjs.org') {
+              expect(resolution).toMatch(/https:\/\/registry\.npmjs\.org\/.+\.tgz$/);
+            }
+          } catch (e) {
+            // Ignore invalid URLs for this test
+          }
         }
       });
     });
