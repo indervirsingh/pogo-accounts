@@ -141,9 +141,9 @@ describe('Package Configuration Validation', () => {
       const uniqueVersions = [...new Set(versions)];
       expect(uniqueVersions.length).toBe(1);
       // Warn if inconsistency is detected
-      if (uniqueVersions.length > 1) {
-        console.warn(`Angular version inconsistency detected: versions ${uniqueVersions.join(', ')}`);
-      }
+      // All Angular packages should have the same major version
+      const uniqueVersions = [...new Set(versions)];
+      expect(uniqueVersions.length).toBe(1);
     });
 
     test('should use valid semantic versioning', () => {
