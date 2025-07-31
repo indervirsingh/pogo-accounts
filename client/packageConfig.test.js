@@ -339,9 +339,7 @@ describe('Package Configuration Validation', () => {
       const coreMajor = parseInt(angularCore.match(/\d+/)?.[0] || '0');
       const dynamicMajor = parseInt(angularPlatformBrowserDynamic.match(/\d+/)?.[0] || '0');
       
-      if (Math.abs(coreMajor - dynamicMajor) > 0) {
-        console.warn('Angular version inconsistency detected between core and platform-browser-dynamic');
-      }
+      expect(coreMajor).toBe(dynamicMajor);
     });
   });
 
