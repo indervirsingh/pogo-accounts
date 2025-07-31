@@ -137,15 +137,13 @@ describe('Package Configuration Validation', () => {
         return match ? parseInt(match[0]) : 0;
       });
 
-      // All Angular packages should be version 19 or 20
-      versions.forEach(version => {
-        expect(version).toBeGreaterThanOrEqual(19);
-        expect(version).toBeLessThanOrEqual(20);
-      });
-
-      // Verify mixed versions (19.x and 20.x) are present as shown in the config
+      // All Angular packages should have the same major version
       const uniqueVersions = [...new Set(versions)];
-      expect(uniqueVersions.length).toBeGreaterThanOrEqual(1);
+      expect(uniqueVersions.length).toBe(1);
+      // Warn if inconsistency is detected
+      if (uniqueVersions.length > 1) {
+        console.warn(`Angular version inconsistency detected: versions ${uniqueVersions.join(', ')}`);
+      }
     });
 
     test('should use valid semantic versioning', () => {
