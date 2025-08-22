@@ -2,142 +2,252 @@ import * as express from "express"
 import * as mongodb from "mongodb"
 import { collections } from "./database"
 import * as escape from "escape-html"
-import * as rateLimit from "express-rate-limit";
+import * as rateLimit from "express-rate-limit"
+import validator from 'validator'
 
-function sanitizePogoAccount(account) {
-    // Add validation and sanitization logic here
-    // For example, ensure only allowed fields are present
-    const allowedFields = ["username", "email", "level"];
-    const sanitizedAccount = {};
-    for (const field of allowedFields) {
-        if (account[field]) {
-            sanitizedAccount[field] = escape(account[field]);
-        }
+// Enhanced sanitization function
+function sanitizePogoAccount(account: any) {
+    if (!account || typeof account !== 'object') {
+        throw new Error('Invalid account data');
     }
+
+    // Define allowed fields and their validation rules
+    const allowedFields = {
+        username: { required: true, maxLength: 50, pattern: /^[a-zA-Z0-9_-]+$/ },
+        email: { required: true, maxLength: 100, isEmail: true },
+        team: { required: true, enum: ['instinct', 'mystic', 'valor'] },
+        country: { required: false, maxLength: 50, pattern: /^[a-zA-Z\s-]+$/ },
+        birthday: { required: false, isDate: true },
+        level: { required: false, isNumeric: true, min: 1, max: 50 }
+    };
+
+    const sanitizedAccount: any = {};
+
+    for (const [field, rules] of Object.entries(allowedFields)) {
+        const value = account[field];
+
+        // Check if required field is missing
+        if (rules.required && (!value || value.toString().trim() === '')) {
+            throw new Error(`${field} is required`);
+        }
+
+        // Skip optional empty fields
+        if (!value && !rules.required) {
+            continue;
+        }
+
+        let sanitizedValue = value;
+
+        // Type-specific validation and sanitization
+        if (rules.isEmail && !validator.isEmail(value)) {
+            throw new Error(`${field} must be a valid email address`);
+        }
+
+        if (rules.isNumeric && !validator.isNumeric(value.toString())) {
+            throw new Error(`${field} must be a number`);
+        }
+
+        if (rules.isDate && !validator.isISO8601(value)) {
+            throw new Error(`${field} must be a valid date`);
+        }
+
+        if (rules.pattern && !rules.pattern.test(value)) {
+            throw new Error(`${field} contains invalid characters`);
+        }
+
+        if (rules.enum && !rules.enum.includes(value)) {
+            throw new Error(`${field} must be one of: ${rules.enum.join(', ')}`);
+        }
+
+        if (rules.maxLength && value.length > rules.maxLength) {
+            throw new Error(`${field} must be less than ${rules.maxLength} characters`);
+        }
+
+        if (rules.min && parseFloat(value) < rules.min) {
+            throw new Error(`${field} must be at least ${rules.min}`);
+        }
+
+        if (rules.max && parseFloat(value) > rules.max) {
+            throw new Error(`${field} must be at most ${rules.max}`);
+        }
+
+        // Sanitize the value
+        if (typeof sanitizedValue === 'string') {
+            sanitizedValue = escape(validator.escape(sanitizedValue.trim()));
+        }
+
+        sanitizedAccount[field] = sanitizedValue;
+    }
+
     return sanitizedAccount;
 }
 
+// Validate MongoDB ObjectId
+function isValidObjectId(id: string): boolean {
+    return mongodb.ObjectId.isValid(id) && id.length === 24;
+}
+
 export const pogoAccountsRouter = express.Router()
-pogoAccountsRouter.use(express.json())
-// Set up rate limiter: maximum of 100 requests per 15 minutes
+pogoAccountsRouter.use(express.json({ limit: '10mb' })) // Limit payload size
+
+// Enhanced rate limiter: maximum of 50 requests per 15 minutes
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // max 100 requests per windowMs
+    max: 50, // Reduced from 100 for better security
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 
 pogoAccountsRouter.use(limiter);
 
-// The route is "/" because all the endpoints from this file are registered under 'pogo-accounts' route
+// Security headers middleware
+pogoAccountsRouter.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Content-Security-Policy', "default-src 'self'");
+    next();
+});
+
+// Get all pogo accounts
 pogoAccountsRouter.get("/", async (_req, res) => {
     try {
-        // The find() method works because we pass an empty object and get all data, 
-        // The toArray() method will convert the cursor to an array
-        const pogoAccounts = await collections.pogoAccounts.find({}).toArray()
-        res.status(200).send(pogoAccounts)
+        const pogoAccounts = await collections.pogoAccounts.find({}).limit(100).toArray()
+        res.status(200).json(pogoAccounts)
     } catch (error) {
-        res.status(500).send(escape(error.message))
+        console.error('Error fetching accounts:', error);
+        res.status(500).json({ error: 'Internal server error' })
     }
 })
 
-
-// Gets a pogo account by id
-
+// Get a pogo account by id
 pogoAccountsRouter.get("/:id", async (req, res) => {
     try {
         const id = req?.params?.id
 
-        // ObjectId() converts the string id to an ObjectId
+        // Validate ObjectId format
+        if (!isValidObjectId(id)) {
+            return res.status(400).json({ error: 'Invalid account ID format' });
+        }
+
         const query = { _id: new mongodb.ObjectId(id) }
-        // findOne() returns the pogoAccount with the given id
         const pogoAccount = await collections.pogoAccounts.findOne(query)
     
-
         if (pogoAccount) {
-            res.status(200).send(pogoAccount)
+            res.status(200).json(pogoAccount)
         } else {
-            res.status(404).send(`Failed to find a pogo account with id: ${escape(id)}`)
+            res.status(404).json({ error: 'Account not found' })
         }
 
     } catch (error) {
-        res.status(500).send(`Failed to find a pogo account with id: ${escape(req?.params?.id)}`)
+        console.error('Error fetching account:', error);
+        res.status(500).json({ error: 'Internal server error' })
     }
-
 })
 
-
-// Creates a pogoAccount object in the database
-
+// Create a pogoAccount object in the database
 pogoAccountsRouter.post("/", async (req, res) => {
     try {
-        const pogoAccount = req?.body
+        const sanitizedAccount = sanitizePogoAccount(req?.body)
+        
+        // Check if account with same email already exists
+        const existingAccount = await collections.pogoAccounts.findOne({ 
+            email: sanitizedAccount.email 
+        });
+        
+        if (existingAccount) {
+            return res.status(409).json({ error: 'Account with this email already exists' });
+        }
 
-        // insertOne() inserts the pogoAccount into the database
-        const result = await collections.pogoAccounts.insertOne(pogoAccount)
-
-        // The insertedId property contains the id of the inserted document
+        const result = await collections.pogoAccounts.insertOne(sanitizedAccount)
         const insertedId = result?.insertedId
 
         if (insertedId) {
-            res.status(201).send(`Successfully created a pogo account with id: ${insertedId}`)
+            res.status(201).json({ 
+                message: 'Account created successfully', 
+                id: insertedId 
+            })
         } else {
-            res.status(500).send(`Failed to create a pogo account`)
+            res.status(500).json({ error: 'Failed to create account' })
         }
 
     } catch (error) {
-        res.status(500).send(escape(error.message))
+        console.error('Error creating account:', error);
+        if (error.message.includes('required') || error.message.includes('invalid')) {
+            res.status(400).json({ error: error.message })
+        } else {
+            res.status(500).json({ error: 'Internal server error' })
+        }
     }
 })
 
-
-// Updates a pogoAccount object in the database
-
+// Update a pogoAccount object in the database
 pogoAccountsRouter.put("/:id", async (req, res) => {
-    res.send(req?.params)
     try {
-
-        // Extract pogoAccount data to update via body
-        const updated_pogoAccount = sanitizePogoAccount(req?.body)
-        // Extract id via params
         const id = req?.params?.id
 
-        // ObjectId() converts the string id to an ObjectId
-        const query = { _id: new mongodb.ObjectId(id) }
-        // updateOne() finds the pogoAccount with the given id and updates it
-        const result = await collections.pogoAccounts.updateOne(query, { $set: updated_pogoAccount })
-
-        if (result && result.matchedCount) {
-            res.status(200).send(`Successfully updated ${escape(updated_pogoAccount.username)}`)
-        } else if (!result.matchedCount) {
-            res.status(404).send(`Failed to find account id: ${escape(id)}`)
-        } else {
-            res.status(304).send(`Failed to update account id: ${escape(id)}`)
+        // Validate ObjectId format
+        if (!isValidObjectId(id)) {
+            return res.status(400).json({ error: 'Invalid account ID format' });
         }
 
-    } catch (error) {
-        res.status(400).send(escape(error.message))
-    }
-})
-
-// Deletes a pogoAccount object in the database
-
-pogoAccountsRouter.delete("/:id", async (req, res) => {
-    try {
-        // Extract & store data properly
-        const id = req?.params?.id
-        // ObjectId() converts the string id to an ObjectId
+        const sanitizedAccount = sanitizePogoAccount(req?.body)
         const query = { _id: new mongodb.ObjectId(id) }
         
-        // findOneAndDelete() finds the pogoAccount with the given id and deletes it
+        const result = await collections.pogoAccounts.updateOne(query, { 
+            $set: { 
+                ...sanitizedAccount, 
+                updatedAt: new Date() 
+            } 
+        })
+
+        if (result && result.matchedCount) {
+            res.status(200).json({ 
+                message: 'Account updated successfully',
+                username: sanitizedAccount.username 
+            })
+        } else if (!result.matchedCount) {
+            res.status(404).json({ error: 'Account not found' })
+        } else {
+            res.status(304).json({ error: 'No changes made to account' })
+        }
+
+    } catch (error) {
+        console.error('Error updating account:', error);
+        if (error.message.includes('required') || error.message.includes('invalid')) {
+            res.status(400).json({ error: error.message })
+        } else {
+            res.status(500).json({ error: 'Internal server error' })
+        }
+    }
+})
+
+// Delete a pogoAccount object in the database
+pogoAccountsRouter.delete("/:id", async (req, res) => {
+    try {
+        const id = req?.params?.id
+        
+        // Validate ObjectId format
+        if (!isValidObjectId(id)) {
+            return res.status(400).json({ error: 'Invalid account ID format' });
+        }
+
+        const query = { _id: new mongodb.ObjectId(id) }
         const result = await collections.pogoAccounts.findOneAndDelete(query)
 
         if (result !== null) {
-            res.status(200).send(`Successfully deleted ${escape(id)}`)
+            res.status(200).json({ 
+                message: 'Account deleted successfully',
+                deletedId: id 
+            })
         } else {
-            res.status(404).send(`Failed to find account id: ${escape(id)}`)
+            res.status(404).json({ error: 'Account not found' })
         }
 
     } catch (error) {
-        res.status(500).send(escape(error.message))
+        console.error('Error deleting account:', error);
+        res.status(500).json({ error: 'Internal server error' })
     }
 })
 
