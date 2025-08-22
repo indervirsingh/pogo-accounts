@@ -8,8 +8,9 @@
 **Issue**: Database credentials exposed in plain text in version control
 
 **Current vulnerable code**:
+<!-- ATLAS_URI=mongodb+srv://indi:3Y5iLauV8HFyTMBh@pogoaccountscluster.oxqfol2.mongodb.net/?retryWrites=true&w=majority&appName=PogoAccountsCluster -->
 ```
-ATLAS_URI=mongodb+srv://indi:3Y5iLauV8HFyTMBh@pogoaccountscluster.oxqfol2.mongodb.net/?retryWrites=true&w=majority&appName=PogoAccountsCluster
+ATLAS_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>?retryWrites=true&w=majority
 ```
 
 ### 2. XSS Vulnerabilities (4 instances)
