@@ -90,9 +90,8 @@ pogo-accounts/
 const allowedFields = {
     username: { required: true, maxLength: 50, pattern: /^[a-zA-Z0-9_-]+$/ },
     email: { required: true, maxLength: 100, isEmail: true },
-    team: { required: true, enum: ['instinct', 'mystic', 'valor'] }
+    team: { required: true, enum: ['Instinct', 'Mystic', 'Valor'] }
 };
-```
 
 ### API Security
 - Rate limiting with `express-rate-limit`
