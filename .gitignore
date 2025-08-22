@@ -29,3 +29,6 @@ coverage/
 # Temporary files
 *.temp
 *.cache
+
+# Project specific - keep local data files
+pogo/
