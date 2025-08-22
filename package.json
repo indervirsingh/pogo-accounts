@@ -1,8 +1,15 @@
 {
-  "name": "pogo-rankings",
-  "version": "1.0.0",
-  "description": "CRUD application for pogo accounts built with MEAN stack",
+  "name": "pogo-accounts-management",
+  "version": "2.0.0",
+  "description": "Secure CRUD application for Pokemon GO accounts built with MEAN stack",
   "main": "index.js",
+  "keywords": ["pokemon-go", "mean-stack", "angular", "express", "mongodb", "security"],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/pogo-accounts.git"
+  },
   "scripts": {
     "start": "npm run prepare && concurrently \"npm run start:server\" \"npm run start:client\"",
     "start:server": "cd server && npm start",
@@ -15,9 +22,17 @@
     "build:client": "cd client && npm run build",
     "test": "npm run prepare && concurrently \"npm run test:client\" \"npm run test:server\"",
     "test:client": "cd client && npm test",
-    "test:server": "cd server && npm test"
+    "test:server": "cd server && npm test",
+    "security:audit": "node scripts/security-audit.js",
+    "security:fix": "cd client && npm audit fix && cd ../server && npm audit fix",
+    "lint": "concurrently \"cd client && npm run lint\" \"cd server && npm run lint\"",
+    "clean": "rm -rf node_modules client/node_modules server/node_modules client/dist server/dist"
   },
   "devDependencies": {
     "concurrently": "^9.2.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
   }
 }

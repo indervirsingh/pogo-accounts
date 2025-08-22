@@ -1,5 +1,31 @@
+# Dependencies
 node_modules/
+*/node_modules/
+
+# Environment variables
 .env
+server/.env
+
+# Build outputs
+dist/
+build/
+*/dist/
+*/build/
+
+# IDE and OS files
 .DS_Store
-pogo
 .vscode/
+*.log
+*.tmp
+
+# Angular specific
+.angular/
+*/.angular/
+
+# Testing
+coverage/
+*.coverage
+
+# Temporary files
+*.temp
+*.cache
