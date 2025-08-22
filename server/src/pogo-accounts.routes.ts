@@ -151,14 +151,7 @@ pogoAccountsRouter.post("/", async (req, res) => {
     try {
         const sanitizedAccount = sanitizePogoAccount(req?.body)
         
-        // Check if account with same email already exists
-        const existingAccount = await collections.pogoAccounts.findOne({ 
-            email: sanitizedAccount.email 
-        });
-        
-        if (existingAccount) {
-            return res.status(409).json({ error: 'Account with this email already exists' });
-        }
+        // Rely on unique index; catch E11000 duplicate key error from insertOne
 
         const result = await collections.pogoAccounts.insertOne(sanitizedAccount)
         const insertedId = result?.insertedId
