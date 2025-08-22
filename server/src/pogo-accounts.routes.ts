@@ -157,11 +157,30 @@ pogoAccountsRouter.post("/", async (req, res) => {
         const insertedId = result?.insertedId
 
         if (insertedId) {
-            res.status(201).json({ 
-                message: 'Account created successfully', 
-                id: insertedId 
-            })
-        } else {
+// client/src/app/pogo-accounts.service.ts
+
+// … around line 35 …
+public createPogoAccount(pogoAccount: PogoAccounts): Observable<{ message: string; id: string }> {
+  return this.httpClient.post<{ message: string; id: string }>(
+    `${this.pogoAccountsUrl}/pogo-accounts`,
+    pogoAccount
+  );
+}
+
+// … around line 39 …
+public updatePogoAccount(id: string, pogoAccount: PogoAccounts): Observable<{ message: string }> {
+  return this.httpClient.put<{ message: string }>(
+    `${this.pogoAccountsUrl}/pogo-accounts/${id}`,
+    pogoAccount
+  );
+}
+
+// … around line 43 …
+public deletePogoAccount(id: string): Observable<{ message: string }> {
+  return this.httpClient.delete<{ message: string }>(
+    `${this.pogoAccountsUrl}/pogo-accounts/${id}`
+  );
+}
             res.status(500).json({ error: 'Failed to create account' })
         }
 
