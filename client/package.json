@@ -38,7 +38,7 @@
     "@typescript-eslint/eslint-plugin": "8.38.0",
     "@typescript-eslint/parser": "8.39.0",
     "eslint": "^9.32.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "resolutions": {
     "**/ip": "https://registry.npmjs.org/neoip/-/neoip-2.1.0.tgz"
