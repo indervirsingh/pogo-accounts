@@ -29,7 +29,7 @@
     "clean": "rm -rf node_modules client/node_modules server/node_modules client/dist server/dist"
   },
   "devDependencies": {
-    "concurrently": "^9.2.0"
+    "concurrently": "^9.2.1"
   },
   "engines": {
     "node": ">=16.0.0",
