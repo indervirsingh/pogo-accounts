@@ -19,7 +19,7 @@
     "express-rate-limit": "^8.0.1",
     "helmet": "^8.1.0",
     "mongodb": "^6.19.0",
-    "validator": "^13.15.15"
+    "validator": "^13.15.22"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
